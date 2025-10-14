@@ -1,0 +1,12 @@
+stylevision_env/
+__pycache__/
+.cache/
+
+# Ignore CSV data if you want
+ecommerce/*.csv
+
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+Thumbs.db
