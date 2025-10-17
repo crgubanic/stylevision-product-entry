@@ -2,8 +2,7 @@ stylevision_env/
 __pycache__/
 .cache/
 
-# Ignore CSV data if you want
-ecommerce/*.csv
+.streamlit/secrets.toml
 
 *.pyc
 *.pyo

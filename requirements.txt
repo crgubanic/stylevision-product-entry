@@ -8,9 +8,15 @@ pandas>=1.5.0
 # Pillow: Image processing for product uploads
 Pillow>=9.0.0
 
-# Ollama: AI/LLM API client for generating product descriptions
-ollama>=0.1.0
+# Groq: AI/LLM API client for generating product descriptions
+groq>=0.1.0
 
 # Optional: PyInstaller for building standalone executables
 # Uncomment if you plan to package the app as an .exe
 # pyinstaller>=5.10.0
+
+# Requests: For fetching background image
+requests>=2.30.0
+
+# Optional: Base64 encoding (built-in, no install required)
+# Optional: datetime, random, os, sys, socket, html, time, subprocess (built-in)
