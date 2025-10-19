@@ -23,6 +23,7 @@ import streamlit as st
 import subprocess
 import sys
 import time
+import uuid
 import webbrowser
 
 print("✅ Libraries imported successfully.")
@@ -162,11 +163,20 @@ if "saving" not in st.session_state:
 if "description" not in st.session_state:
     st.session_state["description"] = ""
     
-# Ensure optional fields exist in session_state so first run doesn't crash
-optional_keys = ["fit", "garment_closure", "care", "occasion_region", "pattern"]
-for k in optional_keys:
-    if k not in st.session_state:
-        st.session_state[k] = []
+if "fit" not in st.session_state:
+    st.session_state["fit"] = []
+
+if "garment_closure" not in st.session_state:
+    st.session_state["garment_closure"] = []
+
+if "care" not in st.session_state:
+    st.session_state["care"] = []
+
+if "occasion_region" not in st.session_state:
+    st.session_state["occasion_region"] = []
+
+if "pattern" not in st.session_state:
+    st.session_state["pattern"] = []
 
 # --------------------------
 # Detect if running with Streamlit
@@ -215,9 +225,21 @@ if st.session_state["saved_success"]:
 # Print current Product ID (console)
 print(f"✅ Generated Product ID: {st.session_state['p_id']}")
 
+# Clear Form button
+if "reset_counter" not in st.session_state:
+    st.session_state["reset_counter"] = 0
+
+if st.button("Clear Form"):
+    st.session_state["reset_counter"] += 1
+    # Delete any other session state keys that need reset
+    for key in ["description_generated", "p_id"]:
+        if key in st.session_state:
+            del st.session_state[key]
+    st.rerun()
+    
 # --------------------------
 # Fields
-name = st.text_input("Product Name*", key="name")
+name = st.text_input("Product Name*", key=f"name_{st.session_state['reset_counter']}")
 
 products = st.multiselect("Product Type*", [
     "Blazer / Jacket", "Clothing Set", "Bralette", "Dress", "Dupatta",
@@ -225,12 +247,12 @@ products = st.multiselect("Product Type*", [
     "Lehenga", "Maternity", "Other", "Pants", "Saree", "Shawl", "Shirt",
     "Shorts", "Skirt", "Sweater", "Sweatshirt", "T-Shirt", "Top", "Vest"
     ],
-    key="products"
+    key=f"products_{st.session_state['reset_counter']}"
 )
 
 # --------------------------
 # Entered as string to allow zero immediately after the decimal
-price_str = st.text_input("Price (USD)*", key="price_str")
+price_str = st.text_input("Price (USD)*", key=f"price_str_{st.session_state['reset_counter']}")
 price = None
 if price_str:
     try:
@@ -251,7 +273,7 @@ colour = st.selectbox("Colour (Primary)*", [
     "Other", "Red", "Rose Gold", "Rust", "Silver", "Tan", "Taupe", "Teal",
     "Turquoise", "Violet", "White", "Yellow"
     ],
-    key="colour"
+    key=f"colour_{st.session_state['reset_counter']}"
 )
 
 pattern = st.multiselect("Pattern (Primary)*", [
@@ -270,10 +292,10 @@ pattern = st.multiselect("Pattern (Primary)*", [
     "Sheer", "Shibori", "Shimmer", "Solid", "Stripes", "Tie Dye", "Tribal",
     "Utility", "Zardozi", "Zari"
     ],
-    key="pattern"
+    key=f"pattern_{st.session_state['reset_counter']}"
 )
 
-brand = st.text_input("Brand Name*", key="brand")
+brand = st.text_input("Brand Name*", key=f"brand_{st.session_state['reset_counter']}")
 
 fabric = st.multiselect("Fabric (choose all that apply)*", [
     "Acrylic", "Bamboo", "Cashmere", "Chiffon", "Corduroy", "Cotton", "Denim",
@@ -281,14 +303,14 @@ fabric = st.multiselect("Fabric (choose all that apply)*", [
     "Lycra", "Modal", "Nylon", "Polyester", "Rayon", "Satin", "Silk", "Spandex",
     "Suede", "Velvet", "Viscose", "Wool"
     ],
-    key="fabric"
+    key=f"fabric_{st.session_state['reset_counter']}"
 )
 
 # Use a fixed key for the uploader, independent of p_id
 uploaded_file = st.file_uploader(
     "Upload Product Image (.jpg required)*",
     type=["jpg"],
-    key="uploaded_file"
+    key=f"uploaded_file_{st.session_state['reset_counter']}"
 )
 
 # Auto-generate image filename
@@ -604,13 +626,13 @@ if st.button("Save Product", disabled=st.session_state.get("saving", False)):
             )
             # -----------------------------
 
-            st.success(f"Product '{st.session_state.get('name', '')}' saved successfully with ID {st.session_state['p_id']}!  Please refresh the page to add another item.  Product cannot be updated after saving.")
+            st.success(f"Product '{st.session_state.get('name', '')}' saved successfully with ID {st.session_state['p_id']}!  Product cannot be updated after saving.")
 
             # Reset for next product
             st.session_state['p_id'] = generate_new_pid()
             st.session_state['description'] = ""
             st.session_state["saving"] = False
-
+    
 # --------------------------
 # Function to launch Streamlit with retries
 def find_available_port(start=8501, end=8510):
