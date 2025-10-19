@@ -599,7 +599,7 @@ if st.button("Save Product", disabled=st.session_state.get("saving", False)):
             st.download_button(
                 label="Download Saved Product to CSV",
                 data=csv_buffer.getvalue().encode(),
-                file_name="all_products_session.csv",
+                file_name="saved_product.csv",
                 mime="text/csv"
             )
             # -----------------------------
