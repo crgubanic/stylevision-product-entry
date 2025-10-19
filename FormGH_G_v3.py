@@ -414,7 +414,7 @@ def generate_description(products, colour, pattern, brand, fabric, fit, garment_
     Do NOT start every description the same way; vary your introduction styles and phrases.
     Vary the adjectives and sentence structures used.
     Combine the listed attributes naturally into flowing sentences.
-    Use all care instructions provided.
+    Use any care instructions selected by the user.
     Use correct British grammar.
     
     Attributes provided:
