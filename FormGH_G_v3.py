@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 import base64
 import datetime
 import html
+import io
 import os
 import pandas as pd
 import random
@@ -130,6 +131,13 @@ if not os.path.exists(csv_file):
         "img", "theme_merged_color_pattern", "theme_merged_fit", "theme_merged_fabric_care",
         "formatted", "description_generated"
     ]).to_csv(csv_file, index=False)
+    
+# Columns for final CSV output
+final_columns = [
+    "p_id", "name", "products", "price", "brand", "img",
+    "theme_merged_color_pattern", "theme_merged_fit", "theme_merged_fabric_care",
+    "formatted", "description_generated"
+]
     
 print("✅ CSV file initialized.")
 
@@ -278,7 +286,7 @@ fabric = st.multiselect("Fabric (choose all that apply)*", [
 
 # Use a fixed key for the uploader, independent of p_id
 uploaded_file = st.file_uploader(
-    "Upload Product Image (.jpg preferred)*",
+    "Upload Product Image (.jpg required)*",
     type=["jpg"],
     key="uploaded_file"
 )
@@ -525,7 +533,6 @@ if st.button("Save Product", disabled=st.session_state.get("saving", False)):
                 "garment_closure": ", ".join(st.session_state['garment_closure']).lower(),
                 "occasion": ", ".join(st.session_state['occasion_region']).lower(),
                 "img": img_filename,
-                # <-- ALWAYS save the generated description
                 "description_generated": st.session_state.get("description", "")
             }
 
@@ -570,24 +577,36 @@ if st.button("Save Product", disabled=st.session_state.get("saving", False)):
                 return "<br>".join(lines)
 
             base_row["formatted"] = format_row_html(base_row, label_buckets)
-            
-            #Save the exact onscreen description
             base_row["description_generated"] = st.session_state.get("description", "")
 
             # Save to CSV
-            final_columns = [
-                "p_id", "name", "products", "price", "brand", "img", "theme_merged_color_pattern",
-                "theme_merged_fit", "theme_merged_fabric_care", "formatted", "description_generated"
-            ]
-            
             df_final = pd.DataFrame([base_row]).reindex(columns=final_columns)
             df_final.to_csv(csv_file, mode="a", index=False, header=False)
+
+            # -----------------------------
+            # SESSION CSV LOGIC (added only)
+            if "session_products" not in st.session_state:
+                st.session_state["session_products"] = pd.DataFrame(columns=final_columns)
+
+            st.session_state["session_products"] = pd.concat(
+                [st.session_state["session_products"], df_final],
+                ignore_index=True
+            )
+
+            csv_buffer = io.StringIO()
+            st.session_state["session_products"].to_csv(csv_buffer, index=False)
+            st.download_button(
+                label="Download All Products CSV",
+                data=csv_buffer.getvalue().encode(),
+                file_name="all_products_session.csv",
+                mime="text/csv"
+            )
+            # -----------------------------
 
             st.success(f"Product '{st.session_state.get('name', '')}' saved successfully with ID {st.session_state['p_id']}!  Please refresh the page to add another item.  Product cannot be updated after saving.")
 
             # Reset for next product
             st.session_state['p_id'] = generate_new_pid()
-            # Explicitly clear description here for the next product
             st.session_state['description'] = ""
             st.session_state["saving"] = False
 
