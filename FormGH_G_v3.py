@@ -414,6 +414,7 @@ def generate_description(products, colour, pattern, brand, fabric, fit, garment_
     Do NOT start every description the same way; vary your introduction styles and phrases.
     Vary the adjectives and sentence structures used.
     Combine the listed attributes naturally into flowing sentences.
+    Use all care instructions provided.
     Use correct British grammar.
     
     Attributes provided:
@@ -596,7 +597,7 @@ if st.button("Save Product", disabled=st.session_state.get("saving", False)):
             csv_buffer = io.StringIO()
             st.session_state["session_products"].to_csv(csv_buffer, index=False)
             st.download_button(
-                label="Download All Products CSV",
+                label="Download Saved Product to CSV",
                 data=csv_buffer.getvalue().encode(),
                 file_name="all_products_session.csv",
                 mime="text/csv"
