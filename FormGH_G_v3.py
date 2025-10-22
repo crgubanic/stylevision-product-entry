@@ -36,6 +36,36 @@ st.set_page_config(
     layout="wide"
 )
 
+# --- Initialize all expected session state keys ---
+required_keys = [
+    "name",
+    "products",  # Product Type
+    "category",
+    "price",
+    "description",
+    "image_url",
+    "brand",
+    "sku",
+    "color",
+    "material",
+    "tags",
+    "fabric",
+    "style",
+    "season",
+    "fit",
+    "occasion",
+    "gender",
+]
+
+for key in required_keys:
+    if key not in st.session_state:
+        st.session_state[key] = ""
+
+# --- Initialize required session state keys ---
+for key in ["name", "category", "price", "description", "image_url", "brand"]:
+    if key not in st.session_state:
+        st.session_state[key] = ""
+
 # --------------------------
 # Function for absolute path (works for PyInstaller)
 def resource_path(relative_path):
@@ -244,20 +274,23 @@ if "reset_counter" not in st.session_state:
 
 if st.button("Clear Form"):
     st.session_state["reset_counter"] += 1
-    # Delete any other session state keys that need reset
-    for key in ["description_generated", "p_id"]:
-        if key in st.session_state:
-            del st.session_state[key]
+    # Deep reset for description memory
+    for key in ["description", "description_generated", "prev_values", "p_id", "session_products"]:
+        st.session_state.pop(key, None)
+    # Force a new Product ID
+    st.session_state["p_id"] = generate_new_pid()
     st.rerun()
     
 # --------------------------
 # Fields
-name = st.text_input("Product Name*", key=f"name_{st.session_state['reset_counter']}")
+rc = st.session_state["reset_counter"]
+
+name = st.text_input("Product Name*", key=f"name_{rc}")
 
 products = st.multiselect("Product Type*", [
-    "Blazer / Jacket", "Clothing Set", "Bralette", "Dress", "Dupatta",
-    "Hoodie / Pullover", "Jeans", "Joggers", "Jumpsuit", "Kurta", "Kurti",
-    "Lehenga", "Maternity", "Other", "Pants", "Saree", "Shawl", "Shirt",
+    "Blazer", "Clothing Set", "Bralette", "Dress", "Dupatta",
+    "Hoodie", "Jacket", "Jeans", "Joggers", "Jumpsuit", "Kurta", "Kurti",
+    "Lehenga", "Maternity", "Other", "Pants", "Pullover", "Saree", "Shawl", "Shirt",
     "Shorts", "Skirt", "Sweater", "Sweatshirt", "T-Shirt", "Top", "Vest"
     ],
     key=f"products_{st.session_state['reset_counter']}"
@@ -265,7 +298,7 @@ products = st.multiselect("Product Type*", [
 
 # --------------------------
 # Entered as string to allow zero immediately after the decimal
-price_str = st.text_input("Price (USD)*", key=f"price_str_{st.session_state['reset_counter']}")
+price_str = st.text_input("Price (USD)*", key=f"price_str_{rc}")
 price = None
 if price_str:
     try:
@@ -286,7 +319,7 @@ colour = st.selectbox("Colour (Primary)*", [
     "Other", "Red", "Rose Gold", "Rust", "Silver", "Tan", "Taupe", "Teal",
     "Turquoise", "Violet", "White", "Yellow"
     ],
-    key=f"colour_{st.session_state['reset_counter']}"
+    key=f"colour_{rc}"
 )
 
 pattern = st.multiselect("Pattern (Primary)*", [
@@ -305,10 +338,10 @@ pattern = st.multiselect("Pattern (Primary)*", [
     "Sheer", "Shibori", "Shimmer", "Solid", "Stripes", "Tie Dye", "Tribal",
     "Utility", "Zardozi", "Zari"
     ],
-    key=f"pattern_{st.session_state['reset_counter']}"
+    key=f"pattern_{rc}"
 )
 
-brand = st.text_input("Brand Name*", key=f"brand_{st.session_state['reset_counter']}")
+brand = st.text_input("Brand Name*", key=f"brand_{rc}")
 
 fabric = st.multiselect("Fabric (choose all that apply)*", [
     "Acrylic", "Bamboo", "Cashmere", "Chiffon", "Corduroy", "Cotton", "Denim",
@@ -316,14 +349,14 @@ fabric = st.multiselect("Fabric (choose all that apply)*", [
     "Lycra", "Modal", "Nylon", "Polyester", "Rayon", "Satin", "Silk", "Spandex",
     "Suede", "Velvet", "Viscose", "Wool"
     ],
-    key=f"fabric_{st.session_state['reset_counter']}"
+    key=f"fabric_{rc}"
 )
 
 # Use a fixed key for the uploader, independent of p_id
 uploaded_file = st.file_uploader(
     "Upload Product Image (.jpg required)*",
     type=["jpg"],
-    key=f"uploaded_file_{st.session_state['reset_counter']}"
+    key=f"uploaded_file_{rc}"
 )
 
 # Auto-generate image filename
@@ -346,29 +379,29 @@ care = st.multiselect("Care (choose all that apply)*", [
     "Iron on Reverse", "Line Dry", "Machine Wash", "No Fabric Softener", "Tumble Dry", "Warm Water",
     "Warm Iron"
     ],
-    key="care"
+    key=f"care_{rc}"
 )
 
-fit = st.multiselect("Fit (choose all that apply)*", [
-    "Bodycon", "Bootcut", "Fitted", "Flare", "High Rise", "Loose", "Mid Rise",
+fit_options = [
+    "Bodycon", "Bootcut", "Fitted", "Flare", "High-rise", "Loose", "Mid-rise",
     "Oversized", "Regular", "Relaxed", "Skinny", "Slim", "Straight", "Tapered",
     "Wide Leg"
-    ],
-    key="fit"
-)
+]
+
+fit = st.multiselect("Fit (choose all that apply)*", fit_options, key=f"fit_{rc}")
 
 garment_closure = st.multiselect("Garment Closure (choose all that apply)*", [
     "Button(s)", "Drawstring", "Elasticated", "Front-open", "Hook & Eye",
     "Slip-on", "Snap", "Tie", "Toggle", "Zip"
     ],
-    key="garment_closure"
+    key=f"garment_closure_{rc}"
 )
 
 occasion_region = st.multiselect("Occasion & Region (for Dupattas) (choose all that apply)", [
     "Casual", "Daily", "Ethnic", "Festive", "Formal", "Fusion", "Maternity",
     "Outdoor", "Party", "Sports", "Traditional", "Western", "Work"
     ],
-    key="occasion_region"
+    key=f"occasion_region_{rc}"
 )
 
 # --------------------------
@@ -446,7 +479,7 @@ def generate_description(products, colour, pattern, brand, fabric, fit, garment_
     ALWAYS include the field Product Name early in the description.
     Do NOT invent or hallucinate any attributes that are not explicitly provided.
     Do NOT include the occasion_region, occasion, or region in the description.
-    Do NOT start every description the same way; vary your introduction styles and phrases.
+    Each description should have a unique opening that engages the reader. Focus on using varied sentence structures and adjectives for each description to make each description feel fresh by not repeating the same introduction for the last 3 descriptions.
     Vary the adjectives and sentence structures used.
     Combine the listed attributes naturally into flowing sentences.
     Use any care instructions selected by the user.
@@ -531,6 +564,33 @@ if st.button("Generate Description"):
 # --------------------------
 # Initialize saving flag
 if "saving" not in st.session_state:
+    st.session_state["saving"] = False
+    
+# --- Sync dynamic widget values into stable session keys (for validation/save) ---
+rc = st.session_state["reset_counter"]
+
+# Ensure all dynamic keys exist as lists
+for key in ["fit", "fabric", "pattern", "care", "garment_closure", "occasion_region"]:
+    dynamic_key = f"{key}_{rc}"
+    if dynamic_key not in st.session_state:
+        st.session_state[dynamic_key] = []
+
+# Sync only the dynamic-keyed inputs
+st.session_state['name'] = st.session_state.get(f"name_{rc}", "").strip()
+st.session_state['brand'] = st.session_state.get(f"brand_{rc}", "").strip()
+st.session_state['price'] = st.session_state.get(f"price_str_{rc}", "")
+st.session_state['colour'] = st.session_state.get(f"colour_{rc}", "")
+st.session_state['fit'] = st.session_state.get(f"fit_{rc}", [])
+st.session_state['fabric'] = st.session_state.get(f"fabric_{rc}", [])
+st.session_state['pattern'] = st.session_state.get(f"pattern_{rc}", [])
+st.session_state['products'] = st.session_state.get(f"products_{rc}", st.session_state.get('products', []))
+st.session_state['care'] = st.session_state.get(f"care_{rc}", [])
+st.session_state['garment_closure'] = st.session_state.get(f"garment_closure_{rc}", [])
+st.session_state['occasion_region'] = st.session_state.get(f"occasion_region_{rc}", [])
+st.session_state['uploaded_file'] = st.session_state.get(f"uploaded_file_{rc}", None)
+
+# Force re-enable save button if no save is actually happening
+if st.session_state.get("saving", True) and not st.session_state.get("description"):
     st.session_state["saving"] = False
 
 # --------------------------
