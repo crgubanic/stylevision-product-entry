@@ -110,8 +110,21 @@ def apply_background():
 apply_background()
 
 # --------------------------
-# Add page title
+# Header Section
 st.title("StyleVision Product Entry")
+
+st.markdown(
+    """
+    <div style="font-size:18px;">
+        This app uses <b>Groq Generative AI</b> to create professional product descriptions from structured e-commerce data.  
+        It generates high-quality, natural-language text from user-provided attributes, demonstrating practical AI-assisted content creation.  
+        The app supports live previews, CSV storage, and robust session management, showcasing a portable, production-ready integration of AI into a web interface.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.divider()  # Adds a clean line break before the rest of the form
 
 # --------------------------
 # Load API key from Streamlit secrets
@@ -644,3 +657,8 @@ def find_available_port(start=8501, end=8510):
             except OSError:
                 continue
     return None
+
+# --------------------------
+# Footer
+st.markdown("---")
+st.caption("Created by **Chris G.** | Generative AI-powered product description tool | Powered by Groq")
