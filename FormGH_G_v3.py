@@ -118,10 +118,16 @@ apply_background()
 # Header Section
 st.title("StyleVision Product Entry")
 st.markdown("""
-<div style="font-size:18px;">
-    This app uses <b>Groq Generative AI</b> to create professional product descriptions from structured e-commerce data.  
-    It generates high-quality, natural-language text from user-provided attributes, demonstrating practical AI-assisted content creation.  
-    The app supports live previews, CSV storage, and robust session management, showcasing a portable, production-ready integration of AI into a web interface.
+<div style="
+    background-color: rgba(204, 51, 0, 0.75);
+    border: 1px solid #4a3a8c;
+    border-radius: 16px;
+    padding: 20px;
+    font-size: 18px;
+    line-height: 1.6;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+">
+    This app uses <b>Groq Generative AI</b> to create professional product descriptions from structured e-commerce data. It generates high-quality, natural-language text from user-provided attributes, demonstrating practical AI-assisted content creation. The app supports live previews, CSV storage, and robust session management, showcasing a portable, production-ready integration of AI into a web interface.
 </div>
 """, unsafe_allow_html=True)
 
@@ -405,7 +411,18 @@ def generate_product_details():
 if products or colour or brand or fabric:
     st.markdown("### Product Details Preview")
     st.markdown(f"""
-    <div style="font-size: 20px; line-height: 1.6;">
+    <div style="
+        background-color: rgba(204, 51, 0, 0.75);
+        border: 1px solid #4a3a8c;
+        border-radius: 12px;
+        padding: 18px 24px;
+        font-size: 20px;
+        line-height: 1.6;
+        box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        width: fit-content;
+        max-width: 80%;
+        margin: 0 auto 0 0;
+    ">
         {generate_product_details()}
     </div>
     """, unsafe_allow_html=True)
@@ -472,6 +489,7 @@ def generate_description(products, colour, pattern, brand, fabric, fit, garment_
 
 # --------------------------
 # Generate Description Button
+st.markdown("<br>", unsafe_allow_html=True)
 if st.button("Generate Description"):
     required_fields_filled = all([
         name.strip(),
@@ -503,7 +521,15 @@ if st.button("Generate Description"):
 
         st.markdown("### Product Description Preview")
         st.markdown(f"""
-        <div style="font-size: 22px; line-height: 1.6;">
+        <div style="
+            background-color: rgba(204, 51, 0, 0.75);
+            border: 1px solid #4a3a8c;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 22px;
+            line-height: 1.6;
+            box-shadow: 0 0 10px rgba(0,0,0,0.4);
+        ">
         {st.session_state['description']}
         </div>
         """, unsafe_allow_html=True)
